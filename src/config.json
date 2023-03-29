@@ -1,0 +1,14 @@
+{
+	"port": 8080,
+	"bodyLimit": "100000kb",
+	"corsHeaders": ["Link"],
+	"projectName": "easytravel",
+	"dbConnection": {
+		"dbtype": "mysql",
+		"database": "easytravel",
+		"username": "root",
+		"password": "kmlckj"
+	},
+	"sessionSecret": "xiezn",
+	"jwtSecret": "xiezn"
+}
