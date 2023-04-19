@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html lang="cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Layui-Tinymce</title>
+</head>
+<link rel="stylesheet" href="../layui/css/layui.css">
+<body>
+<div style="width: 90%;margin: 15px auto;">
+    <textarea name="" id="edit">Here Yes<span style="color: #e03e2d;"><em>Edit initialization</em></span> content</textarea>
+    <hr />
+    <div class="layui-btn-group" style="margin-top: 10px">
+        <button class="layui-btn" lay-event="setContent">Set content</button>
+        <button class="layui-btn" lay-event="insertContent">Insert content</button>
+        <button class="layui-btn" lay-event="getContent">Get content</button>
+        <button class="layui-btn" lay-event="getText">Get Text</button>
+        <button class="layui-btn" lay-event="clearContent">Empty content</button>
+        <button class="layui-btn" lay-event="reload">Overload editor</button>
+        <button class="layui-btn" lay-event="destroy">Destroy editor</button>
+        <button class="layui-btn" lay-event="render">Load editor</button>
+    </div>
+    <br /><hr />
+    Insert the second editor at the same time, and the configuration is independent of each other
+    <hr />
+    <textarea name="" id="edit2">Here Yes<span style="color: #e03e2d;"><em>Edit2 initialization</em></span> content</textarea>
+
+</div>
+
+</body>
+<script src="../layui/layui.js"></script>
+<script>
+    /^http(s*):\/\//.test(location.href) || alert('Please deploy to localhost before accessing');
+    layui.extend({
+        tinymce: '{/}./tinymce/tinymce'
+    }).use(['tinymce', 'util', 'layer'], function () {
+        var tinymce = layui.tinymce
+
+        var util = layui.util;
+
+        var edit = tinymce.render({
+            elem: "#edit"
+            , height: 600
+            // ...
+            // 其余配置可参考官方文档
+        },(opt)=>{
+            //加载完成后回调
+        });
+
+        tinymce.render({
+            elem: "#edit2"
+            , height: 200
+        });
+
+        util.event('lay-event', {
+            getContent:() => {
+                var content = tinymce.get('#edit').getContent()
+                layer.alert(content)
+            },
+            setContent:() => {
+                tinymce.get('#edit').setContent('Click the button to set content：<span style="color: #e03e2d;">' + new Date()+'</span>')
+            },
+            clearContent:() => {
+                tinymce.get('#edit').setContent('')
+            },
+            insertContent:() => {
+                tinymce.get('#edit').insertContent('<b>Insert content</b>')
+            },
+            getText:() => {
+                var text = tinymce.get('#edit').getContent({format:'text'})
+                layer.alert(text)
+            },
+            reload:() => {
+                tinymce.reload({
+                    elem:'#edit'
+                    // 所有参数都可以重新设置 ...
+                },(opt) => {
+                    //重载完成后回调函数，会把所有参数回传，
+                    //重载仅仅重新渲染edit器，不会清空textarea，可手动清空或设置
+                    tinymce.get('#edit').setContent('')
+                })
+            },
+            destroy:()=>{
+                tinymce.get('#edit').destroy()
+            },
+            render:()=>{
+                tinymce.render({elem:'#edit',height:'500px'})
+            }
+        });
+
+
+    });
+</script>
+</html>
