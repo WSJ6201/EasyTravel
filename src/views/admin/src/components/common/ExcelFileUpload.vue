@@ -1,0 +1,142 @@
+<template>
+  <div>
+    <!-- 上传file组件 -->
+    <el-upload
+      ref="upload"
+      :action="getActionUrl"
+      list-type="picture-card"
+      accept=".xls,.xlsx"
+      :limit="limit"
+      :headers="myHeaders"
+      :file-list="fileList"
+      :on-exceed="handleExceed"
+      :on-preview="handleUploadPreview"
+      :on-remove="handleRemove"
+      :on-success="handleUploadSuccess"
+      :on-error="handleUploadErr"
+      :before-upload="handleBeforeUpload"
+    >
+      <i class="el-icon-plus"></i>
+      <div slot="tip" class="el-upload__tip" style="color:#838fa1;">{{tip}}</div>
+    </el-upload>
+    <el-dialog :visible.sync="dialogVisible" size="tiny" append-to-body>
+      <img width="100%" :src="dialogImageUrl" alt>
+    </el-dialog>
+  </div>
+</template>
+<script>
+import storage from "@/utils/storage";
+import base from "@/utils/base";
+export default {
+  data() {
+    return {
+      // check大图
+      dialogVisible: false,
+      // check大图
+      dialogImageUrl: "",
+      // 组件渲染Picture的数组字段，有特殊format要求
+      fileList: [],
+      fileUrlList: [],
+      myHeaders:{}
+    };
+  },
+  props: ["tip", "action", "limit", "multiple", "fileUrls"],
+  mounted() {
+    this.init();
+    this.myHeaders= {
+      'Token':storage.get("Token")
+    }
+  },
+  watch: {
+    fileUrls: function(val, oldVal) {
+      //   console.log("new: %s, old: %s", val, oldVal);
+      this.init();
+    }
+  },
+  computed: {
+    // 计算属性的 getter
+    getActionUrl: function() {
+      // return base.url + this.action + "?token=" + storage.get("token");
+      return `/${this.$base.name}/` + this.action;
+    }
+  },
+  methods: {
+    // 初始化
+    init() {
+      //   console.log(this.fileUrls);
+      if (this.fileUrls) {
+        this.fileUrlList = this.fileUrls.split(",");
+        let fileArray = [];
+        this.fileUrlList.forEach(function(item, index) {
+          var url = item;
+          var name = index;
+          var file = {
+            name: name,
+            url: url
+          };
+          fileArray.push(file);
+        });
+        this.setFileList(fileArray);
+      }
+    },
+    handleBeforeUpload(file) {
+    
+    },
+    // 上传file success后执行
+    handleUploadSuccess(res, file, fileList) {
+      if (res && res.code === 0) {
+        fileList[fileList.length - 1]["url"] = "upload/" + file.response.file;
+        this.setFileList(fileList);
+        this.$emit("change", this.fileUrlList.join(","));
+        this.$message.success("File import success");
+      } else {
+        this.$message.error(res.msg);
+      }
+    },
+    // Picture上传失败
+    handleUploadErr(err, file, fileList) {
+      this.$message.error("File import failed");
+    },
+    // 移除Picture
+    handleRemove(file, fileList) {
+      this.setFileList(fileList);
+      this.$emit("change", this.fileUrlList.join(","));
+    },
+    // check大图
+    handleUploadPreview(file) {
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
+    },
+    // 限制Picture数量
+    handleExceed(files, fileList) {
+      this.$message.warning(`Upload at most ${this.limit} Picture`);
+    },
+    // 重新对fileList进行赋value
+    setFileList(fileList) {
+      var fileArray = [];
+      var fileUrlArray = [];
+      // 有些Picture不Yes公开的，所以需要携带token信息做权限校验
+      var token = storage.get("token");
+      let _this = this;
+      fileList.forEach(function(item, index) {
+        var url = item.url.split("?")[0];
+    if(!url.startsWith("http")) {
+      url = _this.$base.url+url
+    }
+        var name = item.name;
+        var file = {
+          name: name,
+          url: url + "?token=" + token
+        };
+        fileArray.push(file);
+        fileUrlArray.push(url);
+      });
+      this.fileList = fileArray;
+      this.fileUrlList = fileUrlArray;
+    }
+  }
+};
+</script>
+<style lang="scss" scoped>
+</style>
+
