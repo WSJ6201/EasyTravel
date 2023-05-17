@@ -6,8 +6,8 @@
 	"dbConnection": {
 		"dbtype": "mysql",
 		"database": "easytravel",
-		"username": "root",
-		"password": "kmlckj"
+		"username": "shengjia wang",
+		"password": "MK17-cqc"
 	},
 	"sessionSecret": "xiezn",
 	"jwtSecret": "xiezn"
